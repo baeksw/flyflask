@@ -1,0 +1,289 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+<style>
+
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+
+
+
+.hiddenRow {
+    padding: 0 !important;
+}
+
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script type="text/javascript">
+
+function fn_template_table_view(d) {
+	var html = '';
+	html += '<tr class="">';
+	html += '<td class="text-center">'+d['table_name']+'</td>';
+	html += '<td class="text-center">'+d['table_comment']+'</td>';
+	html += '<td class="text-center text-danger">'+d['column_name']+'</td>';
+	html += '<td class="text-center">'+d['comments']+'</td>';
+	if (d['pk'] == 'P') {
+		html += '<td class="text-center">'+d['pk']+'</td>';
+	} else {
+		html += '<td class="text-center">&nbsp;</td>';
+	}
+	html += '<td class="text-center">'+d['nullable']+'</td>';
+	html += '<td class="text-center text-danger">'+d['data_type']+'</td>';
+	html += '<td class="text-center">'+d['data_length']+'</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_table_info_view(d) {
+	var html = '';
+	html += '<option value="'+d['table_name']+'">'+d['table_comment']+' &gt; '+d['table_name']+'</option>';
+	return html;
+	
+}
+
+function fn_template_table_view_no_data() {
+	var html = '';
+	html += '<tr>';
+	html += '<td colspan="8" class="col-xs-12 text-center">조회 결과 없음</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_table_info(tname) {
+	var param = {};
+	param['tname'] = tname;
+	$.ajax({
+		url : '/table_desc',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+
+			$('#table_body').html(fn_template_table_view_no_data());
+			
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_template_table_view(v);
+			});			
+			
+			if (html != '') {
+				$('#table_body').html(html);
+			} else {
+				$('#table_body').html(fn_template_table_view_no_data());
+			}
+			
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+function fn_table_search_list(search) {
+	var param = {};
+	param['search'] = search;
+	$.ajax({
+		url : '/table_search',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+			//			
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_table_info_view(v);
+			});	
+			console.log(html)
+			$('#table_info_view').html(html);
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+
+$(document).ready(function(){
+
+	$('#test').bind('click',function(){
+		
+	});
+		#('#test_btn').addClass('animated slideInLeft');
+		$('#test_btn').addClass('animated bounceOutLeft');	
+	$('#table_info_view').bind('change',function(){
+		var tname = $(this).val();
+		fn_table_info(tname);
+	});
+
+	$('#table_info_view').bind('click',function(){
+		if($('#table_info_view option').length == 1) {
+			$(this).change();
+		}
+	});
+	
+	$('#search').bind('keypress', function(e){
+		var search = $.trim($(this).val());
+		if (e.which == 13) {/* 13 == enter key@ascii */
+			if(search != '') {
+				fn_table_search_list(search);
+			}
+		}
+	});
+
+});
+
+</script>
+{% endblock %} 
+<!-- https://github.com/daneden/animate.css -->
+
+{% block content %}
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2 class="animated rotateInDownLeft ">공지사항</h2>
+	</div>
+	<div class="page-body">
+		<div class="row  ">
+			<div class="col-md-12">
+				<div class="col-xs-6">
+					<div id="test" class="panel panel-info animated flash ">
+						<div class="panel-heading">Panel Heading</div>
+						<div class="panel-body">Panel Content</div>
+					</div>
+				</div>
+				<div class="col-xs-6">
+		
+				
+				
+				<div class="panel panel-default">
+            <table  id="noti" class="table table-condensed animated wobble  " style="border-collapse:collapse;">
+            
+              <thead>
+                <tr>
+                  <th>Table header</th>
+                  <th>Table header</th>
+                </tr>
+              </thead>
+              <tbody>
+                      <tr data-toggle="collapse" data-target="#demo2" class="accordion-toggle">
+                  <td>Table data</td>
+                  <td>Table data</td>
+                </tr>
+                <tr>
+            		<td colspan="2" class="hiddenRow"><div id="demo2" class="accordian-body collapse">
+            		df
+            		sdf
+            		sdf
+            		s
+            		df
+            		sdf
+            		<a href="#" class="btn btn-default">ssss</a>
+            		Demo2</div></td>
+        		</tr>
+                <tr>
+                  <td>Table data</td>
+                  <td>Table data</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+				
+				</div>
+			</div>
+
+		</div>
+
+
+
+<div>
+<form>
+    <input name="title" type="text" placeholder="Title?" />
+    <textarea name="content" data-provide="markdown" rows="10"></textarea>
+    <label class="checkbox">
+      <input name="publish" type="checkbox"> Publish
+    </label>
+    <hr/>
+    <button type="submit" id="test_btn" class="btn">Submit</button>
+  </form> 
+</div>
+
+
+
+
+
+
+
+
+
+
+		<div class="row hide">
+		
+			<div class="col-md-12">
+				<p class="pull-right">
+					<a href="http://210.97.19.50:9040/KTR_ERP" class="btn btn-primary" target="new" >통합정보시스템 바로가기</a>
+				</p>
+			</div>
+			<div class="col-md-12 table-responsive" style="height: 800px; overflow-y: auto;">
+				<table class="table table-bordered " id="table_view">
+					<colgroup>
+					  <col width="15%">
+					  <col width="15%">
+					  <col width="15%">
+					  <col width="8%"><!-- 60 -->
+					  <col width="8%">
+					  <col width="8%">
+					  <col width="8%">
+					  <col width="*">
+					</colgroup>
+					<thead class="thead-inverse">
+						<tr class="bg-info">
+							<th class="text-center">업무분류</th>
+							<th class="text-center">화면</th>
+							<th class="text-center">화면ID</th>
+							<th class="text-center">개발자</th>
+							<th class="text-center">배포여부</th>
+							<th class="text-center">배포일</th>
+							<th class="text-center">진행율(%)</th>
+							<th class="text-center">이슈사항</th>
+						</tr>
+					</thead>
+					<tbody id="table_body">
+					{% if deploys %}
+						{% for x in deploys %}
+						<tr class="ttr text-center" style="text-overflow:ellipsis; overflow:hidden">
+							<td class="text-center">{{ x.scrn_cate}}</td>
+							<td class="text-center job_id">{{ x.scrn }}</td>
+							<td class="text-center">{{ x.scrn_id }}</td>
+							<td >{{ x.devel }}</td>
+							<td class="text-center">{{ x.deploy_yn }}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.deploy_dt }}</td>
+							<td  class="text-danger" style="text-overflow:ellipsis; overflow:hidden">{{ x.prog }}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.issue }}</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+						<tr class="bg-success">
+							<td colspan="8" class="col-xs-12 text-center">NO DATA</td>
+						</tr>
+					{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id"  />
+	</div>
+</div>
+
+{% endblock %}

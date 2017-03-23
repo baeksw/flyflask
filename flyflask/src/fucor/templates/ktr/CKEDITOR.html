@@ -1,0 +1,43 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+<style>
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script src="{{url_for('static', filename='ckeditor/ckeditor.js')}}"></script>
+            <script>
+                // Replace the <textarea id="editor1"> with a CKEditor
+                // instance, using default configuration. 
+                CKEDITOR.replace( 'editor1' );
+            </script>
+{% endblock %} 
+
+
+{% block content %}
+
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2>화면 배포 현황</h2>
+	</div>
+	<div class="page-body">
+	
+	<form>
+            <textarea name="editor1" id="editor1" rows="10" cols="80">
+                This is my textarea to be replaced with CKEditor.
+            </textarea>
+
+        </form>
+        
+        </div>
+</div>
+
+{% endblock %}

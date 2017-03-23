@@ -1,0 +1,412 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+<style>
+.table-fixed thead {
+	width: 97%;
+}
+
+.table-fixed tbody {
+	height: 230px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+.table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td,
+	.table-fixed th {
+	display: block;
+}
+
+.table-fixed tbody td, .table-fixed thead>tr>th {
+	float: left;
+	border-bottom-width: 0;
+}
+
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+
+.table {table-layout: fixed; /*테이블 내에서 <td>의 넓이,높이를 고정한다.*/}
+
+.table td {
+    width:100%; /* width값을 주어야 ...(말줄임)가 적용된다. */
+    overflow: hidden;
+    text-overflow:ellipsis; /*overflow: hidden; 속성과 같이 써줘야 말줄임 기능이 적용된다.*/
+    white-space:nowrap; /*<td>보다 내용이 길경우 줄바꿈 되는것을 막아준다.*/
+}
+
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script type="text/javascript">
+
+function fn_clear_doc() {
+	$('#cate_code').val('J30')
+	$('#issue_id').val('');
+	$('#req_comment').val('');
+	$('#res_comment').val('');
+	$('#extra_comment').val('');
+	$('#req_user').val('U01');
+	$('#res_user').val('U15');
+	$('#res_status').val('S01');
+	
+}
+
+function fn_save_doc() {
+	var param = {};
+	param['cate_code'] = $('#cate_code').val()
+	param['issue_id'] = $('#issue_id').val();
+	param['req_msg'] = $('#req_comment').val();
+	param['res_msg'] = $('#res_comment').val();
+	param['extra_msg'] = $('#extra_comment').val();
+	param['req'] = $('#req_user').val();
+	param['res'] = $('#res_user').val();
+	param['res_stat'] = $('#res_status').val();
+	$.ajax({
+		url : '/req_save',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+			window.location.href='/index'
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+function fn_find_doc() {
+	var param = {};
+	param['issue_id'] = $('#issue_id').val();
+	$.ajax({
+		url : '/find_issue',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+			$('#cate_code').val(d['cate_code'])
+			$('#issue_id').val(d['id']);
+			$('#req_comment').val(d['req_msg']);
+			$('#res_comment').val(d['res_msg']);
+			$('#extra_comment').val(d['extra_msg']);
+			$('#req_user').val(d['req']);
+			$('#res_user').val(d['res']);
+			$('#res_status').val(d['job_stat']);			
+			console.log(JSON.stringify(d))
+			console.log(d['id'])
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+function fn_template_table_view(d) {
+	var html = '';
+	html += '<tr>';
+	html += '<td class="text-center job_id">'+d['id']+'</td>';
+	html += '<td class="text-center">'+d['job_stat']+'</td>';
+	html += '<td class="text-center">'+d['req']+'</td>';
+	html += '<td  style="text-overflow:ellipsis; overflow:hidden">'+d['req_msg']+'</td>';
+	html += '<td class="text-center">'+d['create_dt']+'</td>';
+	html += '<td class="text-center">'+d['res']+'</td>';
+	html += '<td  style="text-overflow:ellipsis; overflow:hidden">'+d['res_msg']+'</td>';
+	html += '<td class="text-center">'+d['update_dt']+'</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_template_table_view_no_data() {
+	var html = '';
+	html += '<tr>';
+	html += '<td colspan="8" class="col-xs-12 text-center">조회 결과 없음</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_find_issue_all(code) {
+	var param = {};
+	param['code'] = code;
+	$.ajax({
+		url : '/find_issue_all',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+			console.log(JSON.stringify(d))
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_template_table_view(v);
+			});			
+			
+			if (html != '') {
+				$('#table_body').html(html);
+			} else {
+				$('#table_body').html(fn_template_table_view_no_data());
+			}
+			
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+$(document).ready(function(){
+	
+	// 화면 초기화
+	fn_clear_doc();
+	
+	/* 초기화 */
+	$('#new_doc').bind('click',function(){
+		fn_clear_doc();
+	});
+
+	$('#save_doc').bind('click',function(){
+		var req_msg = $.trim($('#req_comment').val());
+		
+		if(req_msg == '') {
+				
+		} else {
+			fn_save_doc();
+		}
+	});
+	
+	 $('#table_view').on('click', '.ttr' , function (event) {
+		var id = $(this).find('.job_id').text();
+		$('#issue_id').val(id);
+		console.log(id);
+		fn_find_doc();
+	});
+
+	$('#cate_code').bind('change',function(){
+		var code = $(this).val();
+		fn_find_issue_all(code);
+	});
+	
+	$('#res_status').bind('change',function(){
+		var code = $(this).val();
+		fn_find_issue_all(code);
+	});	
+	  
+});
+
+</script>
+{% endblock %} 
+
+
+
+
+{% block content %}
+
+<div class="container" role="main">
+
+<!-- Static navbar -->
+      <nav class="navbar navbar-default">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/index">KTR 통합정보시스템</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#">About</a></li>
+              <li><a href="#">Contact</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="#">Action</a></li>
+                  <li><a href="#">Another action</a></li>
+                  <li><a href="#">Something else here</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              <li class="active"><a href="./">Default <span class="sr-only">(current)</span></a></li>
+              <li><a href="../navbar-static-top/">Static top</a></li>
+              <li><a href="../navbar-fixed-top/">Fixed top</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
+
+
+
+
+
+
+
+	<div class="page-header">
+		<h2>업무관련 질의응답 게시판<small class="pull-right"><a class="btn btn-xs btn-success" href="/table">TABLE</a></small></h2>
+	</div>
+	<div class="page-body">
+		<div class="row">
+			<!-- INPUT -->
+			<div class="col-md-12">
+				<div class="col-md-4">
+					<div class="panel panel-primary">
+						<div class="panel-heading">요청사항</div>
+						<div class="panel-body">
+					
+							<div class="form-group">
+								<label for="sel">요청자</label> 
+								<select class="form-control" name="req_user" id="req_user">
+								{% for x in users -%}
+									<option value="{{x.code}}">{{x.code_value}}</option>
+								{%- endfor %}	
+								</select>
+							</div>
+							<div class="form-group">
+								<label for="comment" class="pull-right hide ">
+								<button type="button" class="btn btn-sm btn-primary">요청사항 저장</button></label>
+								<textarea class="form-control" rows="10" id="req_comment" placeholder="요청사항은 구체적이고, 사례를 들어 올려주세요."></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="panel panel-info">
+						<div class="panel-heading">답변사항</div>
+						<div class="panel-body">
+							<div class="form-group">
+								<label for="sel">답변</label> 
+								<select class="form-control" id="res_user">
+								{% for x in users -%}
+									<option value="{{x.code}}">{{x.code_value}}</option>
+								{%- endfor %}	 
+								</select>
+							</div>
+
+							<div class="form-group">
+								<label for="comment2" class="pull-right hide">
+									<button type="button" class="btn btn-sm btn-info">처리내용저장</button>
+								</label>
+								<textarea class="form-control " rows="10" id="res_comment" placeholder="답변란"></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4">
+					<div class="panel panel-default">
+						<div class="panel-heading">비고</div>
+						<div class="panel-body">
+						
+							<div class="form-group">
+								<label for="sel">업무 분류</label> 
+								<select class="form-control" name="cate_code" id="cate_code">
+								{% for x in category -%}
+									<option value="{{x.code}}">{{x.code_value}}</option>
+								{%- endfor %}	
+								</select>
+							</div>								
+							
+							<div class="form-group">
+								<label for="sel">진행상태</label> 
+								<select class="form-control" id="res_status">
+								{% for x in status -%}
+									<option value="{{x.code}}">{{x.code_value}}</option>
+								{%- endfor %}	
+								</select>
+							</div>							
+							
+							<div class="form-group">
+								<label for="comment" class="pull-right hide ">
+								<button type="button" class="btn btn-sm btn-primary">요청사항 저장</button></label>
+								<textarea class="form-control" rows="7" id="extra_comment" placeholder="(비고)이슈사항, 취소 사유등"></textarea>
+							</div>
+							
+						</div>
+					</div>
+				</div>				
+			</div>
+			<div class="col-md-12">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{category}}">
+    	<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  		<strong>{{category}}</strong> {{ message }}
+	</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}		
+			</div>
+			<div class="col-md-12">
+				<div class="pull-right">
+				<div class="form-group">
+					<button type="button" class="btn btn-secondary btn-danger" id="new_doc">신규</button></label>
+					<button type="button" class="btn btn-secondary btn-primary" id="save_doc">저장</button></label>
+				</div>
+				</div>
+			</div>
+			<div class="col-md-12 table-responsive" style="height: 300px; overflow-y: scroll;">
+				<table class="table table-bordered " id="table_view">
+					<colgroup>
+					  <col width="*">
+					  <col width="6%">
+					  <col width="6%">
+					  <col width="27%">
+					  <col width="11%">
+					  <col width="6%">
+					  <col width="27%">
+					  <col width="11%">
+					</colgroup>
+					<thead class="thead-inverse">
+						<tr>
+							<th class="text-center">NO.</th>
+							<th class="text-center">진행상태</th>
+							<th class="text-center">요청자</th>
+							<th class="text-center">요청내용</th>
+							<th class="text-center">요청일시</th>
+							<th class="text-center">담당자</th>
+							<th class="text-center">답변</th>
+							<th class="text-center">답변일시</th>
+						</tr>
+					</thead>
+					<tbody id="table_body">
+					{% if issue %}
+						{% for x in issue %}
+						<tr class="ttr">
+							<td class="text-center job_id">{{ x.id }}</td>
+							<td class="text-center">{{ x.job_stat }}</td>
+							<td class="text-center">{{ x.req}}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.req_msg }}</td>
+							<td class="text-center">{{ x.create_dt}}</td>
+							<td class="text-center">{{ x.res }}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.res_msg }}</td>
+							<td class="text-center">{{ x.update_dt}}</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+						<tr>
+							<td colspan="8" class="col-xs-12 text-center">NO DATA</td>
+						</tr>
+					{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id"  />
+	</div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,589 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+
+<style>
+.table-fixed thead {
+	width: 97%;
+}
+
+.table-fixed tbody {
+	height: 230px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+.table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td,
+	.table-fixed th {
+	display: block;
+}
+
+.table-fixed tbody td, .table-fixed thead>tr>th {
+	float: left;
+	border-bottom-width: 0;
+}
+
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+
+
+.table {table-layout: fixed; /*테이블 내에서 <td>의 넓이,높이를 고정한다.*/}
+
+.table td {
+    width:100%; /* width값을 주어야 ...(말줄임)가 적용된다. */
+    overflow: hidden;
+    text-overflow:ellipsis; /*overflow: hidden; 속성과 같이 써줘야 말줄임 기능이 적용된다.*/
+    white-space:nowrap; /*<td>보다 내용이 길경우 줄바꿈 되는것을 막아준다.*/
+}
+
+#table_view {
+  -vendor-animation-duration: 3s;
+  -vendor-animation-delay: 2s;
+}
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script type="text/javascript">
+
+function fn_template_table_view(d) {
+	var html = '';
+	html += '<tr class="">';
+	html += '<td class="text-center">'+d['table_name']+'</td>';
+	html += '<td class="text-center">'+d['table_comment']+'</td>';
+	html += '<td class="text-center text-danger">'+d['column_name']+'</td>';
+	html += '<td class="text-center">'+d['comments']+'</td>';
+	if (d['pk'] == 'P') {
+		html += '<td class="text-center">'+d['pk']+'</td>';
+	} else {
+		html += '<td class="text-center">&nbsp;</td>';
+	}
+	html += '<td class="text-center">'+d['nullable']+'</td>';
+	html += '<td class="text-center text-danger">'+d['data_type']+'</td>';
+	html += '<td class="text-center">'+d['data_length']+'</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_table_info_view(d) {
+	var html = '';
+	html += '<option value="'+d['table_name']+'">'+d['table_comment']+' &gt; '+d['table_name']+'</option>';
+	return html;
+	
+}
+
+function fn_template_table_view_no_data() {
+	var html = '';
+	html += '<tr>';
+	html += '<td colspan="8" class="col-xs-12 text-center">조회 결과 없음</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_table_info(tname) {
+	var param = {};
+	param['tname'] = tname;
+	$.ajax({
+		url : '/table_desc',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+
+			$('#table_body').html(fn_template_table_view_no_data());
+			
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_template_table_view(v);
+			});			
+			
+			if (html != '') {
+				$('#table_body').html(html);
+			} else {
+				$('#table_body').html(fn_template_table_view_no_data());
+			}
+			
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+
+
+function test_run() {
+	
+	
+	var filters = [{"name": "grp_code", "op": "eq", "val": "JOB_CATE"}];
+	var param = {"q": JSON.stringify({"filters": filters})};
+	
+	$.ajax({
+	  url: '/api/TM_ISSUE02',
+	  data: param,
+	  dataType: "json",
+	  contentType: "application/json",
+	  success: function(data) { 
+		//  console.log(data.objects);
+		  var html = '';
+		  
+		  $.each(data['objects'],function(k,v){
+			  console.log(k+'-->'+v['code'])
+			  html += '<option value="' + v['code'] + '">' + v['code_value'] + "</option>";
+			  
+		  })
+		  
+		  $('#category').html(html);
+	  }
+	});
+
+}
+
+
+function find_tm_issue04(id) {
+	var filters = [{"name": "id", "op": "eq", "val": id }];
+	var param = {"q": JSON.stringify({"filters": filters})};
+	
+	$.ajax({
+	  url: '/api/TM_ISSUE04',
+	  data: param,
+	  dataType: "json",
+	  contentType: "application/json",
+	  success: function(d){
+		var data = d['objects'][0]
+		  console.log(JSON.stringify(data));
+		$('#id').val(data['id']);
+		$('#scrn').val(data['scrn']);
+		$('#scrn_id').val(data['scrn_id']);
+		$('#scrn_cate').val(data['scrn_cate']);
+		$('#devel').val(data['devel']);
+		
+		if(data['deploy_yn'] == 'Y') {
+			$('#deploy_yn_1').prop('checked',true);
+			$('#deploy_yn_2').prop('checked',false);
+		} else {
+			$('#deploy_yn_1').prop('checked',false);
+			$('#deploy_yn_2').prop('checked',true);
+		}
+		
+		
+		
+		$('#prog').val(data['prog']);
+		$('#deploy_dt').val(data['deploy_dt']);
+		$('#issue').val(data['issue']);
+	  }
+	}).done(function(){
+		console.log("finish!!");
+	});	
+}
+
+
+
+function load_select(grp_code, func) {
+	var filters = [{"name": "grp_code", "op": "eq", "val": grp_code }];
+	var param = {"q": JSON.stringify({"filters": filters})};
+	
+	$.ajax({
+	  url: '/api/TM_ISSUE02',
+	  data: param,
+	  dataType: "json",
+	  contentType: "application/json",
+	  success: func
+	});	
+}
+
+
+function init_category() {
+	var callback = function(data) { 
+		//categoryle.log(data.objects);
+		var scrn_cate = '{{scrn_code}}';
+		var html = '';
+		$.each(data['objects'],function(k,v){
+			if(scrn_cate == v['code']) {
+				html += '<option value="' + v['code'] + '" selected>' + v['code_value'] + "</option>";
+			} else {
+				html += '<option value="' + v['code'] + '">' + v['code_value'] + "</option>";
+			}
+		});
+		  
+		$('#scrn_cate').html(html);
+	  }
+	
+	load_select("JOB_CATE",callback); 
+	
+}
+
+function init_dev() {
+	var callback = function(data) { 
+		//  console.log(data.objects);
+		  var html = '';
+		  $.each(data['objects'],function(k,v){
+			  html += '<option value="' + v['code'] + '">' + v['code_value'] + "</option>";
+		  })
+		  $('#devel').html(html);
+	  }
+	
+	load_select("DEV_GROUP",callback);
+	
+}
+
+
+function fn_update_issue04() {
+	var param = {};
+	param['scrn'] = $('#scrn').val();
+	param['scrn_id'] = $('#scrn_id').val();
+	param['scrn_cate'] = $('#scrn_cate').val();
+	param['devel'] = $('#devel').val();
+	
+	if ($('#deploy_yn_1').is(':checked') == true) {
+		param['deploy_yn'] = 'Y';
+	} else {
+		param['deploy_yn'] = 'N';
+	}
+	
+	param['prog'] =  $('#prog').val();
+	param['deploy_dt'] = $('#deploy_dt').val();
+	param['issue'] =  $('#issue').val();
+	
+	var id = $('#id').val();
+	param['id'] = id;
+	var patch = { 'data' : {
+			"type" : "TM_ISSUE04",
+			"id" : id,
+			"attributes" : param
+		}
+	};
+	var cate = $('#scrn_cate').val();
+	if (cate == 'NONE') {
+		alert('업무분류 선택 하세요.!')
+		$('#scrn_cate').focus().select();
+		return;
+	}
+
+	return $.ajax({
+		url: '/update_tm_issue04',
+		data : $.param(param),
+		type : 'POST',
+		//contentType:"application/json",
+		dataType : 'json',
+		success : function(d) {
+			console.log('success>>' + d);
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+
+}
+function fn_save_issue04() {
+	var param = {};
+	param['scrn'] = $('#scrn').val();
+	param['scrn_id'] = $('#scrn_id').val();
+	param['scrn_cate'] = $('#scrn_cate').val();
+	param['devel'] = $('#devel').val();
+	if ($('#deploy_yn_1').is(':checked') == true) {
+		param['deploy_yn'] = 'Y';
+	} else {
+		param['deploy_yn'] = 'N';
+	}
+	param['prog'] =  $('#prog').val();
+	param['deploy_dt'] = $('#deploy_dt').val();
+	param['issue'] =  $('#issue').val();
+	var cate = $('#scrn_cate').val();
+	if (cate == 'NONE') {
+		alert('업무분류 선택 하세요.!')
+		$('#scrn_cate').focus().select();
+		return;
+	}
+	return $.ajax({
+		url: '/api/TM_ISSUE04',
+		data : JSON.stringify(param),
+		type : 'POST',
+		contentType:"application/json",
+		dataType : 'json',
+		success : function(d) {
+			console.log(d);
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+	
+}
+
+
+$(document).ready(function(){
+	
+	init_category();
+	init_dev();
+
+	$('#bnt_new').bind('click',function(d){
+		$('#id').val('');
+		$('#scrn').val('');
+		$('#scrn_id').val('');
+		$('#scrn_cate').val('C01');
+		$('#devel').val('D01');
+		$('#deploy_yn').val('');
+		$('#prog').val('');
+		$('#deploy_dt').val('');
+		$('#issue').val('');		
+	});	
+
+	$('#bnt_search').bind('click',function(d){
+		var code = $('#scrn_cate').val();
+			window.location.href = '/deploy/'+code
+	});
+
+	$('#bnt_save').bind('click', function(e){
+		
+		var id = $('#id').val();
+		
+		if (id == '') {
+			var func = fn_save_issue04();
+			if (func != undefined){
+				func.done(function(){
+					window.location.href = '/deploy'
+					window.location.reload();
+				});
+			}
+		} else {
+			var func = fn_update_issue04();
+			if (func != undefined){
+				func.done(function(d){
+					window.location.href = '/deploy'
+					window.location.reload();
+				});
+			}
+		}
+		
+		
+	});
+	
+
+	 $('#table_view').on('click', '.ttr' , function (event) {
+			var id = $(this).attr('sid');
+			find_tm_issue04(id);
+	});
+
+	
+});
+
+</script>
+{% endblock %} 
+
+
+{% block content %}
+
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2>화면 배포 현황<small><a href="http://210.97.19.50:9040/KTR_ERP" class="pull-right btn  btn-info" target="_new">통합정보시스템 바로가기</a></small></h2>
+	</div>
+	<div class="page-body">
+		<div class="row">
+
+			<div class="col-md-9 table-responsive" style="height: 700px; overflow-y: auto;">
+				<table class="table table-bordered table-condensed table-hover" id="table_view">
+					<colgroup>
+					  <col width="12%">
+					  <col width="23%">
+					  <col width="12%">
+					  <col width="8%"><!-- 60 -->
+					  <col width="6%">
+					  <col width="8%">
+					  <col width="8%">
+					  <col width="*">
+					</colgroup>
+					<thead class="thead-inverse">
+						<tr class="bg-info">
+							<th class="text-center">업무분류</th>
+							<th class="text-center">화면</th>
+							<th class="text-center">화면ID</th>
+							<th class="text-center">개발자</th>
+							<th class="text-center">배포여부</th>
+							<th class="text-center">배포일</th>
+							<th class="text-center">진행율(%)</th>
+							<th class="text-center">이슈사항</th>
+						</tr>
+					</thead>
+					<tbody id="table_body">
+					{% if deploys %}
+						{% for x in deploys %}
+						<tr class="ttr text-center" style="text-overflow:ellipsis; overflow:hidden" sid="{{x.id}}">
+							<td class="text-center">{{ x.scrn_cate}}</td>
+							<td class="text-center job_id">{{ x.scrn }}</td>
+							<td class="text-center warning">{{ x.scrn_id }}</td>
+							<td >{{ x.devel }}</td>
+							{% if x.deploy_yn == "배포" %}
+							<td class="text-center success">{{ x.deploy_yn }}</td>
+							{% else %}
+							<td class="text-center danger">{{ x.deploy_yn }}</td>
+							{% endif%}
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.deploy_dt }}</td>
+							{% if (x.prog >=85 )  %}
+							<td style="text-overflow:ellipsis; overflow:hidden"><font color="red">{{ x.prog }}%</font></td>
+							{% else %}
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.prog }}%</td>
+							{% endif%}
+							
+							<td  style="text-over4vel style="height: 800px; overflow-y: auto;">{{ x.issue }}</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+						<tr class="bg-success">
+							<td colspan="8" class="col-xs-12 text-center">NO DATA</td>
+						</tr>
+					{% endif %}
+					</tbody>
+				</table>
+			</div>
+			
+			<div class="col-md-3">
+				<blockquote>
+  					<p>최근 배포일 : 2016년 12월 30일 오후 2시</p>
+  					<!-- <footer>Someone famous in <cite title="Source Title">Source Title</cite></footer>  -->
+				</blockquote>
+				
+				<div class="panel panel-default">
+						<div class="panel-heading">화면배포</div>
+						<div class="panel-body">
+<!-- FORM -->
+
+<form class="form-horizontal">
+<input name="id" type="hidden" id="id" />
+	<fieldset>
+		<!-- Select Basic -->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="업무분류">업무분류</label>
+			<div class="col-md-5">
+				<select id="scrn_cate" name="업무분류" class="form-control">
+					<option>no data</option>
+				</select>
+			</div>
+			<div class="col-md-3">
+				<button id="bnt_search" name="bnt_search" class="btn btn-info">조회</button>
+			</div>
+		</div>
+
+		<!-- Text input-->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="화면">화면</label>
+			<div class="col-md-8">
+				<input id="scrn" name="화면" type="text" placeholder="화면명입력"
+					class="form-control input-md" required=""> 
+			</div>
+		</div>
+
+		<!-- Text input-->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="화면ID">화면ID</label>
+			<div class="col-md-8">
+				<input id="scrn_id" name="화면ID" type="text" placeholder="화면ID"
+					class="form-control input-md" required=""> 
+			</div>
+		</div>
+
+		<!-- Select Basic -->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="개발자">개발자</label>
+			<div class="col-md-8">
+				<select id="devel" name="개발자" class="form-control">
+					<option>no data</option>
+				</select>
+			</div>
+		</div>
+
+		<!-- Multiple Radios -->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="배포여부">배포여부</label>
+			<div class="col-md-8">
+				<div class="radio">
+					<label for="배포여부-0"> 
+						<input type="radio" name="deploy_yn" id="deploy_yn_1" value="Y" checked="checked">배포
+					</label>
+				</div>
+				<div class="radio">
+					<label for="배포여부-1"> 
+						<input type="radio" name="deploy_yn" id="deploy_yn_2" value="N">예정
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<!-- Select Basic -->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="진행율">진행율</label>
+			<div class="col-md-8">
+				<select id="prog" name="진행율" class="form-control">
+					<option value="5">5%</option>
+					<option value="10">10%</option>
+					<option value="15">15%</option>
+					<option value="20">20%</option>
+					<option value="25">25%</option>
+					<option value="30">30%</option>
+					<option value="35">35%</option>
+					<option value="40">40%</option>
+					<option value="45">45%</option>
+					<option value="50">50%</option>
+					<option value="55">55%</option>
+					<option value="60">60%</option>
+					<option value="65">65%</option>
+					<option value="70">70%</option>
+					<option value="75">75%</option>
+					<option value="80">80%</option>
+					<option value="85">85%</option>
+					<option value="90">90%</option>
+					<option value="95">95%</option>
+					<option value="100">100%</option>
+				</select>
+			</div>
+		</div>
+
+		<!-- Text input-->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="배포일">배포일</label>
+			<div class="col-md-8">
+				<input id="deploy_dt" name="배포일" type="date" placeholder="배포일" class="form-control input-md" required=""> 
+			</div>
+		</div>
+
+		<!-- Textarea -->
+		<div class="form-group">
+		  <label class="col-md-4 control-label" for="issue">이슈사항</label>
+		  <div class="col-md-8">                     
+			<textarea class="form-control" id="issue" name="issue"></textarea>
+		  </div>
+		</div>
+
+		<!-- Button -->
+		<div class="form-group">
+			<label class="col-md-4 control-label" for="bnt_save">&nbsp;</label>
+			<div class="col-md-8">
+				<button id="bnt_new" name="bnt_new" class="btn btn-info">신규</button>
+				<button id="bnt_save" name="bnt_save" class="btn btn-primary">저장</button>
+			</div>
+		</div>
+
+	</fieldset>
+</form>
+
+<!-- FORM -->
+						</div>
+					</div>
+			</div>
+			
+		</div>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id"  />
+	</div>
+</div>
+
+{% endblock %}

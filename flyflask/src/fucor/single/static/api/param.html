@@ -1,0 +1,159 @@
+<param_append>
+<div class="row">
+	<div class="col-md-8">
+		<table class="table table-hover table-bordered table-sm">
+			<thead class="thead-inverse">
+				<tr>
+					<th class="text-center bg-info">#</th>
+					<th class="text-center bg-info">파라미터</th>
+					<th class="text-center bg-info">파라미터 설명</th>
+					<th class="text-center bg-info">데이터타입</th>
+					<th class="text-center bg-info">비고</th>
+				</tr>
+			</thead>
+			<tbody class="text-center" id="param_view" onclick={ select_row }>
+				<!-- 
+					<tr>
+						<td>v_CNAME</td>
+						<td>파라미터 설명</td>
+						<td>VARCHAR2</td>
+						<td>비고</td>
+					</tr>
+				 -->
+				<tr>
+					<td colspan="5" class="no_param">NO PARAMETERS</td>
+				</tr>
+
+			</tbody>
+		</table>
+	</div>
+	<div class="col-md-4">
+		<form class="form-horizontal" onsubmit="{ on_submit }">
+			<fieldset>
+
+				<!-- Form Name -->
+				<legend>Define Parameters</legend>
+
+				<!-- Text input-->
+				<div class="form-group">
+					<label class="col-md-4 control-label" for="textinput">파라미터</label>
+					<div class="col-md-8">
+						<input id="param_name" name="textinput" type="text"
+							placeholder="파라미터" class="form-control input-md" required="">
+					</div>
+				</div>
+				
+				<!-- Text input-->
+				<div class="form-group">
+					<label class="col-md-4 control-label" for="textinput">파라미터 설명</label>
+					<div class="col-md-8">
+						<input id="param_desc" name="textinput" type="text"
+							placeholder="파라미터 설명" class="form-control input-md" required="">
+					</div>
+				</div>
+
+				<!-- Select Basic -->
+				<div class="form-group">
+				  <label class="col-md-4 control-label" for="data_type">데이터 타입</label>
+				  <div class="col-md-4">
+				    <select id="data_type" name="data_type" class="form-control">
+				    </select>
+				  </div>
+				</div>
+				
+				<!-- Text input-->
+				<div class="form-group">
+					<label class="col-md-4 control-label" for="textinput">비고</label>
+					<div class="col-md-8">
+						<input id="extra_desc" name="textinput" type="text" placeholder="비고" class="form-control input-md">
+					</div>
+				</div>
+				
+				<!-- Button -->
+				<div class="form-group">
+					<label class="col-md-4 control-label" for="singlebutton">&nbsp;</label>
+					<div class="col-md-4">
+						<button id="append_param" name="append_param" class="btn btn-primary">추가</button>
+						<button id="delete_param" onclick={ delete_param } name="delete_param" class="btn btn-danger">삭제</button>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+
+	</div>
+</div>
+
+<script>
+
+$(document).ready(function(){
+	
+	$.getJSON('/ora_dtypes',function(d){
+		
+		var html = '';
+		$('#data_type').html('');
+		$.each(d,function(k,v){
+			var pname = v['param_name'];
+			var pvalue = v['param_value'];
+			html += '<option value="' + pvalue + '">' + pname + '</option>';
+		});
+		$('#data_type').html(html);
+	});
+	
+});
+
+this.select_row = function(){
+	var tdlist = $(this).find('td');
+	for ( var i = 0; i < tdlist.length ; i++ ) {
+		console.log(i + " >> " + $(tdlist[i]).text());
+	}
+}
+
+this.no_param_view = function() {
+	var html = '';
+	html += '<tr><td colspan="5">NO PARAMETERS</td></tr>';
+	return html;
+}
+
+this.make_row = function(vars) {
+	html = '';
+	html += '<tr>';
+	html += '<td no="5"><button class="btn btn-danger btn-sm">삭제</button></td>';
+	html += '<td no="1" val="'+vars['param_name']+'">'+vars['param_name']+'</td>';
+	html += '<td no="2">'+vars['param_desc']+'</td>';
+	html += '<td no="3">'+vars['data_type']+'</td>';
+	html += '<td no="4">'+vars['extra_desc']+'</td>';
+	html += '</tr>';
+	return html;
+}
+
+this.delete_param = function(e) {
+	e.preventDefault();
+		
+	alert(1);
+}
+this.on_submit = function(e) {
+	e.preventDefault();
+	
+	var vars = {
+		"param_name" : $('#param_name').val()
+		, "param_desc" : $('#param_desc').val()
+		, "data_type"  : $('#data_type').val()
+		, "extra_desc" : $('#extra_desc').val()
+	};
+
+	if($('td[val="'+vars['param_name']+'"]').length > 0) {
+		return;
+	}
+	
+	var html = this.make_row(vars);
+	if (1 == $('#param_view').find('.no_param').length) {
+		$('#param_view').html('');	
+	}
+	
+	$('#param_view').append(html);
+
+	 
+}
+
+</script>
+</param_append>

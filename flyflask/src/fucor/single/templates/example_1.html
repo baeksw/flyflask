@@ -1,0 +1,84 @@
+{% extends "bootstrap/base.html" %} 
+
+
+{% block styles %} 
+{{super()}}
+<!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.5/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script>html5.addElements('todo')</script>
+<![endif]-->
+<style>
+.completed {
+  text-decoration: line-through;
+  color: #ccc;
+}
+
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script type="riot/tag">
+<recommendation>
+	<H1> here is recommendation</H1>
+</recommendation>
+</script>
+<script type="riot/tag">
+<panel>
+<div class="panel { opts.type }">
+  <div class="panel-heading">{ opts.title }</div>
+  <div class="panel-body"><yield/></div>
+</div>
+</panel>
+</script>
+    <script data-src="{{url_for('static',filename='todo.tag')}}" type="riot/tag"></script>
+    <script src="https://rawgit.com/riot/riot/master/riot%2Bcompiler.min.js"></script>
+
+    <script>
+    $.getJSON('/todo', function(data){
+	    riot.mount('todo', data);
+    });
+    /* 
+    riot.mount('todo', {
+      title: 'I want to behave!',
+      items: [
+        { title: 'Avoid excessive caffeine', done: true },
+        { title: 'Hidden item',  hidden: true },
+        { title: 'Be less provocative'  },
+        { title: 'Be nice to people' }
+      ]
+    })
+    */
+
+    $(document).ready(function(){
+    	var tags = riot.mount('recommendation');
+    	
+    	var panel = riot.mount('panel',{'head':'panel-info','panel_type':'panel-info'});
+    	
+    });
+    </script>
+{% endblock %}
+
+{% block content %}
+  
+<div class="container" role="main">
+	<div class="page-header">
+		<h2>TODO</h2>
+	</div>
+	<div class="page-body" style="margin:0;padding:0">	
+		<div class="row" id="table_view"></div>
+	</div>
+	
+	<panel type="panel-info" title="hello">
+		<div class="row">
+			<div class="col-md-6" >
+				<todo></todo> 
+			</div>
+		</div>
+	</panel>
+	
+	
+</div>
+	
+{% endblock %}

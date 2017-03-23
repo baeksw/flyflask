@@ -1,0 +1,143 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+<link href="{{url_for('static', filename='ktr.css')}}" rel="stylesheet">
+<style>
+table.dataframe, .dataframe th, .dataframe td {
+  border: none !important;
+  border-bottom: 1px solid #C8C8C8 !important;
+  text-align:center !important;
+}
+
+</style>
+
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script src="{{url_for('static', filename='ckeditor/ckeditor.js')}}"></script>
+<script type="text/javascript">
+function autoPlayYouTubeModal(){
+	  var trigger = $("body").find('[data-toggle="modal"]');
+	  trigger.click(function() {
+	    var theModal = $(this).data( "target" ),
+	    videoSRC = $(this).attr( "data-theVideo" ), 
+	    videoSRCauto = videoSRC+"?autoplay=1" ;
+	    $(theModal+' iframe').attr('src', videoSRCauto);
+	    $(theModal+' button.close').click(function () {
+	        $(theModal+' iframe').attr('src', videoSRC);
+	    });   
+	  });
+	}
+$(document).ready(function(){
+	  autoPlayYouTubeModal();
+	  $.get('/ktr/df',function(d){
+		  $('#table_view').html(d);
+		  var t = $('#table_view').find('table');
+		  t.attr('id','dataframe');
+		  $('#dataframe tr').removeAttr('style');
+		  $('.dataframe').addClass('table table-hover table-striped table-condensed table-bordered');
+		  t.removeClass('dataframe')
+		  
+		  $('#dataframe').addClass('text-center')
+		  $('#dataframe thead th').addClass('text-center bg-info')
+		  
+		  
+	  })
+	});
+
+</script>
+{% endblock %} 
+
+
+
+{% block content %}
+<div class="container" role="main">
+	{% include 'ktr/menu.html' %}
+	<div class="page-header">
+		<h2>테이블 조회</h2>
+	</div>
+	<div class="page-body">
+		<div class="row" id="table_view">
+		</div>
+		<div class="row">
+		<div class="col-md-12">
+				<div class="pull-right">
+				<div class="form-group">
+					<a href="#" class="btn btn-default" data-toggle="modal" data-target="#videoModal" data-theVideo="http://www.youtube.com/embed/loFtozxZG0s" >VIDEO</a>
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+  Launch demo modal
+</button>
+				</div>
+				</div>
+			</div>
+		
+			<!-- INPUT -->
+			<div class="col-md-12">
+				<div class="col-md-4">
+					<div class="panel panel-default">
+						<div class="panel-heading">비고</div>
+						<div class="panel-body">
+						
+							<div class="form-group">
+								<label for="sel">업무 분류</label> 
+								<select class="form-control" name="cate_code" id="cate_code">
+								{% for x in category -%}
+									<option value="{{x.code}}">{{x.code_value}}</option>
+								{%- endfor %}	
+								</select>
+							</div>								
+							
+							<div class="form-group">
+								<label for="sel">진행상태</label> 
+								<select class="form-control" id="res_status">
+								{% for x in status -%}
+									<option value="{{x.code}}">{{x.code_value}}</option>
+								{%- endfor %}	
+								</select>
+							</div>							
+							
+							<div class="form-group">
+								<label for="comment" class="pull-right hide ">
+								<button type="button" class="btn btn-sm btn-primary">요청사항 저장</button></label>
+								<textarea class="form-control" rows="7" name="extra_comment" id="extra_comment" placeholder="(비고)이슈사항, 취소 사유등"></textarea>
+							</div>
+							
+						</div>
+					</div>
+				</div>				
+			</div>
+			<div class="col-md-12">
+{% with messages = get_flashed_messages(with_categories=true) %}
+  <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+  {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{category}}">
+    	<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+  		<strong>{{category}}</strong> {{ message }}
+	</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}		
+			</div>
+			</div>
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id"  />
+	</div>
+</div>
+<div class="modal fade" id="videoModal" tabindex="-1" role="dialog" aria-labelledby="videoModal" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-body">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <div>
+          <iframe width="100%" height="350" src=""></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% include 'ktr/modal.html' %}
+{% endblock %}

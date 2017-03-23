@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<builder>
+	<output>
+		<base_dir>C:/Users/USER/workspace/KTR_ERP/src/main/java/core/erp/crm</base_dir>
+		<sqlmap_dir>C:/Users/USER/workspace/KTR_ERP/src/main/resources/core/config/sqlmap/crm</sqlmap_dir>
+	</output>
+	
+	<coder>
+		<desc><![CDATA[항목자료 코드(신규)]]></desc>
+		<name><![CDATA[이창준]]></name>
+		<since><![CDATA[2016.11.23]]></since>
+		<version><![CDATA[1.0]]></version>
+	</coder>
+	
+	<class code="CRMAA001" base_package="core.erp.crm">
+		<method name="SEARCH00">
+			<descr>
+				<pre><![CDATA[항목자료 코드(신규)를 저장, 수정 또는 삭제 한다.]]></pre>
+				<param><![CDATA[조회할 정보가 담긴 Map 객체]]></param>
+				<return><![CDATA[/TMMA0010/SEARCH00]]></return>
+				<exception><![CDATA[처리 시 발생할 예외]]></exception>
+			</descr>
+			<table name="TM_SELECT_TEST1">
+				<column name="TEST1" alias="TEST1" comment="시작문자1" />
+				<column name="TEST2" alias="TEST2" comment="시작문자2" />
+				<column name="TEST3" alias="TEST3" comment="시작문자3" />
+				<column name="TEST4" alias="TEST4" comment="시작문자4" />
+				<column name="TEST5" alias="TEST5" comment="시작문자5" />
+				<column name="TEST6" alias="TEST6" comment="시작문자6" />
+				<column name="TEST7" alias="TEST7" comment="시작문자7" />
+			</table>
+		</method>
+
+		<method name="SAVE00">
+			<descr>
+				<pre><![CDATA[항목자료 코드(신규)를 저장, 수정 또는 삭제 한다.]]></pre>
+				<param><![CDATA[저장할 정보가 담긴 Map 객체]]></param>
+				<return><![CDATA[처리건수]]></return>
+				<exception><![CDATA[처리 시 발생할 예외]]></exception>
+			</descr>
+			<table name="TM_SELECT_TEST2">
+				<column name="TEST1" alias="TEST1" comment="시작문자1" />
+				<column name="TEST2" alias="TEST2" comment="시작문자2" />
+				<column name="TEST3" alias="TEST3" comment="시작문자3" />
+				<column name="TEST4" alias="TEST4" comment="시작문자4" />
+				<column name="TEST5" alias="TEST5" comment="시작문자5" />
+				<column name="TEST6" alias="TEST6" comment="시작문자6" />
+				<column name="TEST7" alias="TEST7" comment="시작문자7" />
+			</table>
+		</method>
+
+		<method name="DELETE00">
+			<descr>
+				<pre><![CDATA[항목자료 코드(신규)를 저장, 수정 또는 삭제 한다.]]></pre>
+				<param><![CDATA[저장, 수정 또는 삭제할 자료]]></param>
+				<return><![CDATA[처리건수]]></return>
+				<exception><![CDATA[처리 시 발생할 예외]]></exception>
+			</descr>
+			<table name="TM_SELECT_TEST3">
+				<column name="TEST1" alias="TEST1" comment="시작문자1" />
+				<column name="TEST2" alias="TEST2" comment="시작문자2" />
+				<column name="TEST3" alias="TEST3" comment="시작문자3" />
+				<column name="TEST4" alias="TEST4" comment="시작문자4" />
+				<column name="TEST5" alias="TEST5" comment="시작문자5" />
+				<column name="TEST6" alias="TEST6" comment="시작문자6" />
+				<column name="TEST7" alias="TEST7" comment="시작문자7" />
+			</table>
+		</method>
+
+	</class>
+</builder>

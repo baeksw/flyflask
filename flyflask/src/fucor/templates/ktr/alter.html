@@ -1,0 +1,276 @@
+{% extends "bootstrap/base.html" %} {% block styles %} {{super()}}
+<style>
+.table-fixed thead {
+	width: 97%;
+}
+
+.table-fixed tbody {
+	height: 230px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+.table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td,
+	.table-fixed th {
+	display: block;
+}
+
+.table-fixed tbody td, .table-fixed thead>tr>th {
+	float: left;
+	border-bottom-width: 0;
+}
+
+.container {
+	max-width: 1820px;
+	width: 100%;
+}
+.nopadding {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+.samllpadding {
+	padding: 10px !important;
+	margin: 0 !important;
+}
+.table {
+	table-layout: fixed; /*테이블 내에서 <td>의 넓이,높이를 고정한다.*/
+}
+
+textarea {
+	font-size: 9pt !important;
+}
+
+.table td {
+	width: 100%; /* width값을 주어야 ...(말줄임)가 적용된다. */
+	overflow: hidden;
+	text-overflow: ellipsis; /*overflow: hidden; 속성과 같이 써줘야 말줄임 기능이 적용된다.*/
+	white-space: nowrap; /*<td>보다 내용이 길경우 줄바꿈 되는것을 막아준다.*/
+}
+</style>
+{% endblock %} {% block scripts %} {{super()}}
+<script type="text/javascript">
+	function add_script(text) {
+		var script_output = $('#script_output').text() + text;
+		$('#script_output').text(script_output);
+
+	}
+
+	function comment(table_name, col_name, col_log) {
+		var code = '\n-- ' + table_name + '.' + col_name + ' ' + col_log + '추가';
+		code += '\nCOMMENT ON COLUMN ' + table_name + '.' + col_name + ' IS \''
+				+ col_log + '\';\n';
+		add_script(code);
+	}
+
+	function type_change(table_name, col_name, col_log, data_type) {
+		var code = "\nALTER TABLE " + table_name + " MODIFY(" + col_name + " "
+				+ data_type + ");"
+		add_script(code);
+	}
+
+	function nullable(table_name, col_name, col_log) {
+		var code = "\nALTER TABLE " + table_name + " MODIFY(" + col_name
+				+ " NULL);"
+		add_script(code);
+	}
+
+	function notnull(table_name, col_name, col_log) {
+		var code = "\nALTER TABLE " + table_name + " MODIFY(" + col_name
+				+ " NOT NULL);"
+		add_script(code);
+	}
+
+	function add_column(table_name, col_name, col_log, data_type) {
+		var code = "\nALTER TABLE " + table_name + " ADD(" + col_name + " "
+				+ data_type + ");"
+		add_script(code);
+	}
+
+	function rename(table_name, col_name, col_name_new) {
+		var code = "\nALTER TABLE " + table_name + " RENAME COLUMN " + col_name
+				+ " TO " + col_name_new + ";"
+		add_script(code);
+	}
+
+	function drop(table_name, col_name, col_name_new) {
+		var code = "\nALTER TABLE " + table_name + " DROP(" + col_name + ");"
+		add_script(code);
+	}
+
+	$(document).ready(function() {
+		$('#generate').bind('click', function() {
+			var table_name = $('#table_name').val();
+			var table_comment = $('#table_comment').val();
+			var col_name = $('#col_name').val();
+			var col_log = $('#col_comment').val();
+			var data_type = $('#data_type').val();
+			var new_col_name = $('#new_col_name').val();
+			var code_type = $('#code_type').val();
+			switch (code_type) {
+			case '1':
+				comment(table_name, col_name, col_log);
+				break;
+			case '2':
+				add_column(table_name, col_name, col_log, data_type);
+				break;
+			case '3':
+				drop(table_name, col_name, new_col_name);
+				break;
+			case '4':
+				rename(table_name, col_name, new_col_name);
+				break;
+			case '5':
+				type_change(table_name, col_name, col_log, data_type)
+				break;
+			case '6':
+				nullable(table_name, col_name, col_log);
+				break;
+			case '7':
+				notnull(table_name, col_name, col_log);
+				break;
+			}
+		});
+
+	});
+</script>
+{% endblock %} {% block content %}
+
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2>Alter Table Utility</h2>
+	</div>
+	<div class="page-body">
+		<div class="row">
+		
+				<div class="col-md-9">
+					<div class="panel panel-info">
+						<div class="panel-heading">CODE</div>
+						<div class="panel-body nopadding">
+							<!-- FORM -->
+							<textarea class="form-control" cols="21" rows="25"
+						id="script_output" name="script_output"></textarea>
+							<!-- FORM -->
+						</div>
+					</div>
+				</div>
+							
+			<div class="col-md-3">
+				<div class="panel panel-default">
+					<div class="panel-heading">테이블 수정</div>
+					<div class="panel-body">
+						<!-- FORM -->
+
+						<form class="form-horizontal">
+							<input name="id" type="hidden" id="id">
+							<fieldset>
+
+
+
+								<!-- Text input-->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="table_name">테이블명</label>
+									<div class="col-md-7">
+										<input id="table_name" name="table_name" type="text"
+											placeholder="테이블명" class="form-control input-md" required="">
+
+									</div>
+								</div>
+
+								<!-- Text input-->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="table_comment">테이블
+										주석</label>
+									<div class="col-md-7">
+										<input id="table_comment" name="table_comment" type="text"
+											placeholder="테이블 주석" class="form-control input-md"
+											required="">
+
+									</div>
+								</div>
+
+								<!-- Text input-->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="col_name">컬럼
+										명</label>
+									<div class="col-md-7">
+										<input id="col_name" name="col_name" type="text"
+											placeholder="컬럼 명" class="form-control input-md">
+
+									</div>
+								</div>
+
+								<!-- Text input-->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="col_comment">컬럼
+										주석</label>
+									<div class="col-md-7">
+										<input id="col_comment" name="col_comment" type="text"
+											placeholder="컬럼 주석" class="form-control input-md">
+
+									</div>
+								</div>
+
+								<!-- Text input-->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="data_type">데이터타입</label>
+									<div class="col-md-7">
+										<input id="data_type" name="data_type" type="text"
+											placeholder="데이터타입" value="VARCHAR2(20)"
+											class="form-control input-md">
+
+									</div>
+								</div>
+
+								<!-- Text input-->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="new_col_name">컬럼
+										명(신규)</label>
+									<div class="col-md-7">
+										<input id="new_col_name" name="new_col_name" type="text"
+											placeholder="컬럼 명(신규)" class="form-control input-md">
+
+									</div>
+								</div>
+								<!-- Select Basic -->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="selectbasic">생성타입</label>
+									<div class="col-md-7">
+										<select id="code_type" name="code_type" class="form-control">
+											<option value="1">COMMENT</option>
+											<option value="2">ADD_COLUMN</option>
+											<option value="3">DROP_COLUMN</option>
+											<option value="4">RENAME</option>
+											<option value="5">CHANGE_COLUMN_TYPE</option>
+											<option value="6">NULL_ABLE</option>
+											<option value="7">NOT_NULL</option>
+										</select>
+									</div>
+								</div>
+
+
+								<!-- Button -->
+								<div class="form-group">
+									<label class="col-md-4 control-label" for="generate">코드
+										생성</label>
+									<div class="col-md-4">
+										<a id="generate" name="generate" class="btn btn-info">추가</a>
+									</div>
+								</div>
+							</fieldset>
+						</form>
+
+						<!-- FORM -->
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id" />
+	</div>
+</div>
+
+{% endblock %}

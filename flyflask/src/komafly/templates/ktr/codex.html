@@ -1,0 +1,189 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+<style>
+.table-fixed thead {
+	width: 97%;
+}
+
+.table-fixed tbody {
+	height: 230px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+.table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td,
+	.table-fixed th {
+	display: block;
+}
+
+.table-fixed tbody td, .table-fixed thead>tr>th {
+	float: left;
+	border-bottom-width: 0;
+}
+
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+
+.table {table-layout: fixed; /*테이블 내에서 <td>의 넓이,높이를 고정한다.*/}
+
+.table td {
+    width:100%; /* width값을 주어야 ...(말줄임)가 적용된다. */
+    overflow: hidden;
+    text-overflow:ellipsis; /*overflow: hidden; 속성과 같이 써줘야 말줄임 기능이 적용된다.*/
+    white-space:nowrap; /*<td>보다 내용이 길경우 줄바꿈 되는것을 막아준다.*/
+}
+
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script type="text/javascript">
+
+function fn_template_table_view(d) {
+	var html = '';
+	html += '<tr class="">';
+	html += '<td class="text-center">'+d['comm_code']+'</td>';
+	html += '<td class="text-center">'+d['comm_cdnm']+'</td>';
+	html += '<td class="text-center">'+d['comd_code']+'</td>';
+	html += '<td class="text-center">'+d['comd_cdnm']+'</td>';
+	html += '<td class="text-center">'+d['ref1_fild']+'</td>';
+	html += '<td class="text-center">'+d['ref2_fild']+'</td>';
+	html += '<td class="text-center">'+d['ref3_fild']+'</td>';
+	html += '</tr>';
+	return html;
+}
+function fn_template_table_view_no_data() {
+	var html = '';
+	html += '<tr>';
+	html += '<td colspan="7" class="col-xs-12 text-center">조회 결과 없음</td>';
+	html += '</tr>';
+	return html;
+}
+function fn_code_search_list(search) {
+	var param = {};
+	param['search'] = search;
+	$.ajax({
+		url : '/code_search',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+			//			
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_template_table_view(v);
+			});	
+			if (html == '') {
+				html = fn_template_table_view_no_data();
+			}
+			$('#table_info_view').html(html);
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+
+$(document).ready(function(){
+
+	$('#search').bind('keypress', function(e){
+		var search = $.trim($(this).val());
+		if (e.which == 13) {/* 13 == enter key@ascii */
+			if(search != '') {
+				fn_code_search_list(search);
+			}
+		}
+	});
+	
+	$('#show_code').bind('click',function(){
+		$('#code_view').removeClass('hide');
+	});
+
+});
+
+</script>
+{% endblock %} 
+
+
+{% block content %}
+
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2>공통코드 조회</h2>
+	</div>
+	<div class="page-body">
+		<div class="row hide" id="code_view">
+		</div>
+		<div class="row">
+			<div class="col-md-12 ">
+				<div class="col-xs-6 col-xs-offset-6">
+					<div class="form-inline pull-right">
+						<div class="form-group">
+							 <label for="search" id="show_code">코드 검색&nbsp;</label>
+							<input type="text" class="form-control" name="search" id="search" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-12 ">
+			&nbsp;
+			</div>
+			<div class="col-md-12 table-responsive" style="height: 600px; overflow-y: auto;">
+				<table class="table table-bordered table-striped table-condensed table-hover" id="table_view">
+					<colgroup>
+					  <col width="20%">
+					  <col width="20%">
+					  <col width="15%">
+					  <col width="15%"><!-- 60 -->
+					  <col width="15%">
+					  <col width="10%">
+					  <col width="10%">
+					  <col width="*">
+					</colgroup>
+					<thead class="thead-inverse">
+						<tr class="bg-info">
+							<th class="text-center">마스터코드</th>
+							<th class="text-center">마스터코드설명</th>
+							<th class="text-center">상세코드</th>
+							<th class="text-center">상세코드설명</th>
+							<th class="text-center">보조필드1</th>
+							<th class="text-center">보조필드2 </th>
+							<th class="text-center">보조필드3</th>
+						</tr>
+					</thead>
+					<tbody id="table_info_view">
+					{% if issue %}
+						{% for x in issue %}
+						<tr class="ttr bg-success">
+							<td class="text-center job_id">{{ x.id }}</td>
+							<td class="text-center">{{ x.job_stat }}</td>
+							<td class="text-center">{{ x.req}}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.req_msg }}</td>
+							<td class="text-center">{{ x.res }}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.res_msg }}</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+						<tr>
+							<td colspan="7" class="col-xs-12 text-center">검색 결과 없음</td>
+						</tr>
+					{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id"  />
+	</div>
+</div>
+
+{% endblock %}

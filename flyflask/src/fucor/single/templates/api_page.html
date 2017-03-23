@@ -1,0 +1,45 @@
+{% extends "bootstrap/base.html" %} 
+
+
+{% block styles %} 
+{{super()}}
+<!--[if lt IE 9]>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.0.5/es5-shim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script>html5.addElements('todo')</script>
+<![endif]-->
+<style>
+.completed {
+  text-decoration: line-through;
+  color: #ccc;
+}
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+ <script data-src="{{url_for('static',filename='todo.tag')}}" type="riot/tag"></script>
+ <script data-src="{{url_for('static',filename='api/param.html')}}" type="riot/tag"></script>
+ <script src="https://rawgit.com/riot/riot/master/riot%2Bcompiler.min.js"></script>
+
+ <script>
+ riot.mount('param_append',{});
+ </script>
+{% endblock %}
+
+{% block content %}
+  
+<div class="container" role="main">
+	<div class="page-header">
+		<h2>API관리</h2>
+	</div>
+	<div class="page-body" style="margin:0;padding:0">
+	<param_append></param_append>
+	</div>
+</div>
+	
+{% endblock %}

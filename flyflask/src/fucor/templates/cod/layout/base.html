@@ -1,0 +1,80 @@
+{% block doc -%}
+<!DOCTYPE html>
+<html{% block html_attribs %}{% endblock html_attribs %}>
+{%- block html %}
+  <head>
+    {%- block head %}
+    <title>{% block title %}{{title|default}}{% endblock title %}</title>
+
+    {%- block metas %}
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {%- endblock metas %}
+
+    {%- block styles %}
+	<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}" />
+	<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap-responsive.min.css')}}" />
+	<link rel="stylesheet" href="{{url_for('static', filename='css/fullcalendar.css')}}" />
+	<link rel="stylesheet" href="{{url_for('static', filename='css/matrix-style.css')}}" />
+	<link rel="stylesheet" href="{{url_for('static', filename='css/matrix-media.css')}}" />
+	<link href="{{url_for('static', filename='font-awesome/css/font-awesome.css')}}" rel="stylesheet" />
+	<link rel="stylesheet" href="{{url_for('static', filename='css/jquery.gritter.css')}}" />
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+    {%- endblock styles %}
+    
+    {%- endblock head %}
+  </head>
+  <body{% block body_attribs %}{% endblock body_attribs %}>
+    {% block body -%}
+    <!--Header-part-->
+<div id="header">
+  <h1><a href="dashboard.html">Matrix Admin2</a></h1>
+</div>
+    {% block navbar %}
+	{# include 'cod/layout/top_header.html' #} 
+	{# include 'cod/layout/top_search.html' #}   
+    {%- endblock navbar %}
+
+
+    {% block content -%}
+    
+	{# include 'cod/layout/action_boxes.html' #}
+	
+    {%- endblock content %}
+
+<!--Footer-part-->
+
+<div class="row-fluid">
+  <div id="footer" class="span12"> 2016 &copy; FU+COR. SeungWoo.BAEK <a href="#">Themedesigner.in</a> </div>
+</div>
+
+<!--end-Footer-part-->
+	
+    {% block scripts %}
+<script src="{{url_for('static',filename='js/excanvas.min.js')}}"></script>       
+<script src="{{url_for('static',filename='js/jquery.min.js')}}"></script>         
+<script src="{{url_for('static',filename='js/jquery.flot.min.js')}}"></script>   
+<script src="{{url_for('static',filename='js/jquery.flot.resize.min.js')}}"></script>      
+<script src="{{url_for('static',filename='js/jquery.ui.custom.js')}}"></script>   
+<script src="{{url_for('static',filename='js/bootstrap.min.js')}}"></script>      
+<script src="{{url_for('static',filename='js/jquery.peity.min.js')}}"></script>   
+<script src="{{url_for('static',filename='js/fullcalendar.min.js')}}"></script>   
+<script src="{{url_for('static',filename='js/matrix.dashboard.js')}}"></script>   
+<script src="{{url_for('static',filename='js/jquery.gritter.min.js')}}"></script> 
+<script src="{{url_for('static',filename='js/matrix.interface.js')}}"></script>   
+<script src="{{url_for('static',filename='js/matrix.chat.js')}}"></script>        
+<script src="{{url_for('static',filename='js/jquery.validate.js')}}"></script>    
+<script src="{{url_for('static',filename='js/matrix.form_validation.js')}}"></script>      
+<script src="{{url_for('static',filename='js/jquery.wizard.js')}}"></script>      
+<script src="{{url_for('static',filename='js/jquery.uniform.js')}}"></script>     
+<script src="{{url_for('static',filename='js/matrix.popover.js')}}"></script>     
+<script src="{{url_for('static',filename='js/select2.min.js')}}"></script>        
+<script src="{{url_for('static',filename='js/jquery.dataTables.min.js')}}"></script>
+<script src="{{url_for('static',filename='js/matrix.js')}}"></script>             
+<script src="{{url_for('static',filename='js/matrix.tables.js')}}"></script>      
+    {%- endblock scripts %}
+    {%- endblock body %}
+  </body>
+{%- endblock html %}
+</html>
+{% endblock doc -%}

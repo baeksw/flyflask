@@ -1,0 +1,52 @@
+{% extends "bootstrap/base.html" %} {% block styles %} {{super()}}
+<link href="{{url_for('static', filename='ktr.css')}}" rel="stylesheet">
+<style>
+table.dataframe, .dataframe th, .dataframe td {
+	border: none !important;
+	border-bottom: 1px solid #C8C8C8 !important;
+	text-align: center !important;
+}
+</style>
+
+{% endblock %} {% block scripts %} {{super()}}
+<script src="{{url_for('static', filename='ckeditor/ckeditor.js')}}"></script>
+<script type="text/javascript">
+
+$(document).ready(function(){
+	  $.get('/ktr/df',function(d){
+		  $('#table_view').html(d);
+		  var t = $('#table_view').find('table');
+		  t.attr('id','dataframe');
+		  $('#dataframe tr').removeAttr('style');
+		  $('.dataframe').addClass('table table-hover table-striped table-condensed table-bordered');
+		  t.removeClass('dataframe')
+		  $('#dataframe').addClass('text-center')
+		  $('#dataframe thead th').addClass('text-center bg-info')
+	  })
+	});
+
+</script>
+{% endblock %} {% block content %}
+<div class="container" role="main">
+	{% include 'ktr/menu.html' %}
+	<div class="page-header">
+		<h2>테이블 조회</h2>
+	</div>
+	<div class="page-body">
+		<div class="row">
+			<div class="col-md-12">
+				{% with messages = get_flashed_messages(with_categories=true) %}
+				<!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
+				{% if messages %} {% for category, message in messages %}
+				<div class="alert alert-{{category}}">
+					<a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+					<strong>{{category}}</strong> {{ message }}
+				</div>
+				{% endfor %} {% endif %} {% endwith %}
+			</div>
+		</div>
+		<div class="row" id="table_view"></div>
+	</div>
+</div>
+
+{% include 'ktr/modal.html' %} {% endblock %}

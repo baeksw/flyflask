@@ -1,0 +1,122 @@
+{% extends "bootstrap/base.html" %} {% block styles %} {{super()}}
+<style>
+.table-fixed thead {
+	width: 97%;
+}
+
+.table-fixed tbody {
+	height: 230px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+.table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td,
+	.table-fixed th {
+	display: block;
+}
+
+.table-fixed tbody td, .table-fixed thead>tr>th {
+	float: left;
+	border-bottom-width: 0;
+}
+
+.container {
+	max-width: 1820px;
+	width: 100%;
+}
+
+.table {
+	table-layout: fixed; /*테이블 내에서 <td>의 넓이,높이를 고정한다.*/
+}
+
+.spacer {
+	margin: 0;
+	padding: 0;
+	height: 25px;
+}
+
+textareaX {
+	background-color: lightblue !important;
+	color: black !important;
+}
+
+textarea {
+	font-size: 9pt !important;
+}
+
+.nopadding {
+	padding: 0 !important;
+	margin: 0 !important;
+}
+.samllpadding {
+	padding: 10px !important;
+	margin: 0 !important;
+}
+
+#formated_query1 {
+	background-color: lightpink !important;
+}
+
+.table td {
+	width: 100%; /* width값을 주어야 ...(말줄임)가 적용된다. */
+	overflow: hidden;
+	text-overflow: ellipsis; /*overflow: hidden; 속성과 같이 써줘야 말줄임 기능이 적용된다.*/
+	white-space: nowrap; /*<td>보다 내용이 길경우 줄바꿈 되는것을 막아준다.*/
+}
+</style>
+{% endblock %} {% block scripts %} {{super()}}
+<script type="text/javascript">
+
+</script>
+{% endblock %} {% block content %}
+
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2>Sql Formatter</h2>
+	</div>
+	<div class="page-body">
+		<form id="target" action="/sqlformat" method="POST">
+			<div class="row">
+				<div class="col-md-5">
+					<div class="panel panel-info">
+						<div class="panel-heading">쿼리문</div>
+						<div class="panel-body nopadding">
+							<!-- FORM -->
+							<textarea class="form-control samllpadding input-xs" rows="29" id="query"
+								name="query">{{query}}</textarea>
+							<!-- FORM -->
+						</div>
+					</div>
+				</div>
+				<div class="col-md-1" >
+					<div class="form-group">
+						<button id="formating"
+							class="form-control btn btn-danger pull-right">
+							<span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span>&nbsp;변환
+						</button>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="panel panel-primary">
+						<div class="panel-heading">포멧팅 쿼리문</div>
+						<div class="panel-body nopadding">
+							<!-- FORM -->
+							<textarea class="form-control samllpadding input-xs" rows="29" id="formated_query"
+								name="formated_query">{{formated_query}}</textarea>
+							<!-- FORM -->
+						</div>
+					</div>
+				</div>				
+				
+
+			</div>
+		</form>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id" />
+	</div>
+</div>
+
+{% endblock %}

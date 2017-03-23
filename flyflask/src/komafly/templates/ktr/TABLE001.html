@@ -1,0 +1,251 @@
+{% extends "bootstrap/base.html" %} 
+
+{% block styles %} 
+{{super()}}
+<style>
+.table-fixed thead {
+	width: 97%;
+}
+
+.table-fixed tbody {
+	height: 230px;
+	overflow-y: auto;
+	width: 100%;
+}
+
+.table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td,
+	.table-fixed th {
+	display: block;
+}
+
+.table-fixed tbody td, .table-fixed thead>tr>th {
+	float: left;
+	border-bottom-width: 0;
+}
+
+.container {
+      max-width: 1820px;
+      width: 100%;
+}
+
+.table {table-layout: fixed; /*테이블 내에서 <td>의 넓이,높이를 고정한다.*/}
+
+.table td {
+    width:100%; /* width값을 주어야 ...(말줄임)가 적용된다. */
+    overflow: hidden;
+    text-overflow:ellipsis; /*overflow: hidden; 속성과 같이 써줘야 말줄임 기능이 적용된다.*/
+    white-space:nowrap; /*<td>보다 내용이 길경우 줄바꿈 되는것을 막아준다.*/
+}
+
+</style>
+{% endblock %} 
+
+{% block scripts %} 
+{{super()}}
+<script type="text/javascript">
+
+function fn_template_table_view(d) {
+	var html = '';
+	html += '<tr class="">';
+	html += '<td class="text-center">'+d['table_name']+'</td>';
+	html += '<td class="text-center">'+d['table_comment']+'</td>';
+	html += '<td class="text-center text-danger">'+d['column_name']+'</td>';
+	html += '<td class="text-center">'+d['comments']+'</td>';
+	if (d['pk'] == 'P') {
+		html += '<td class="text-center">'+d['pk']+'</td>';
+	} else {
+		html += '<td class="text-center">&nbsp;</td>';
+	}
+	html += '<td class="text-center">'+d['nullable']+'</td>';
+	html += '<td class="text-center text-danger">'+d['data_type']+'</td>';
+	html += '<td class="text-center">'+d['data_length']+'</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_table_info_view(d) {
+	var html = '';
+	html += '<option value="'+d['table_name']+'">'+d['table_comment']+' &gt; '+d['table_name']+'</option>';
+	return html;
+	
+}
+
+function fn_template_table_view_no_data() {
+	var html = '';
+	html += '<tr>';
+	html += '<td colspan="8" class="col-xs-12 text-center">조회 결과 없음</td>';
+	html += '</tr>';
+	return html;
+}
+
+function fn_table_info(tname) {
+	var param = {};
+	param['tname'] = tname;
+	$.ajax({
+		url : '/table_desc',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+
+			$('#table_body').html(fn_template_table_view_no_data());
+			
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_template_table_view(v);
+			});			
+			
+			if (html != '') {
+				$('#table_body').html(html);
+			} else {
+				$('#table_body').html(fn_template_table_view_no_data());
+			}
+			
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+function fn_table_search_list(search) {
+	var param = {};
+	param['search'] = search;
+	$.ajax({
+		url : '/table_search',
+		data : param ,
+		type : 'POST',
+		dataType : 'json',
+		success : function(d) {
+			//			
+			var html = '';
+			$.each(d,function(k,v){
+				html += fn_table_info_view(v);
+			});	
+			console.log(html)
+			$('#table_info_view').html(html);
+		},
+		error: function(err) {
+			console.log(err)
+		}
+	});
+}
+
+
+$(document).ready(function(){
+
+	$('#table_info_view').bind('change',function(){
+		var tname = $(this).val();
+		fn_table_info(tname);
+	});
+
+	$('#table_info_view').bind('click',function(){
+		if($('#table_info_view option').length == 1) {
+			$(this).change();
+		}
+	});
+	
+	$('#search').bind('keypress', function(e){
+		var search = $.trim($(this).val());
+		if (e.which == 13) {/* 13 == enter key@ascii */
+			if(search != '') {
+				fn_table_search_list(search);
+			}
+		}
+	});
+
+});
+
+</script>
+{% endblock %} 
+
+
+{% block content %}
+
+<div class="container" role="main">
+	{% include 'nav.html' %}
+	<div class="page-header">
+		<h2>테이블 정보 확인</h2>
+	</div>
+	<div class="page-body">
+		<div class="row">
+			<div class="col-md-12">
+				<div class="col-md-7">
+					<p>&nbsp;</p>
+				</div>
+				<div class="col-md-5">
+					<div class="col-xs-5 form-inline">
+							<div class="form-group form-inline pull-right ">
+								<!-- <label for="search">테이블명 검색</label> --> 
+								<input type="text" class="form-control" name="search" id="search" />
+							</div>
+					</div>
+					<div class="col-xs-7">
+					<div class="form-group  ">
+						<!-- 		<label for="table_info" class="pull-right">테이블 선택</label> -->
+						<select class="form-control text-danger" name="table_info_view" id="table_info_view"> 
+						{% for x in tables -%}
+							<option value="{{x.table_name}}">{{x.table_comment}} &gt; {{x.table_name}}</option> 
+						{%- endfor %}
+						</select>
+					</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="col-md-12 ">
+			&nbsp;
+			</div>
+			<div class="col-md-12 table-responsive" style="height: 600px; overflow-y: auto;">
+				<table class="table table-bordered table-condensed table-hover" id="table_view">
+					<colgroup>
+					  <col width="15%">
+					  <col width="15%">
+					  <col width="15%">
+					  <col width="15%"><!-- 60 -->
+					  <col width="10%">
+					  <col width="10%">
+					  <col width="10%">
+					  <col width="10%">
+					</colgroup>
+					<thead class="thead-inverse">
+						<tr class="bg-info">
+							<th class="text-center">TABLE_NAME</th>
+							<th class="text-center">TABLE_COMMENT</th>
+							<th class="text-center">COLUMN_NAME</th>
+							<th class="text-center">COLUMN_COMMENT</th>
+							<th class="text-center">PRIMARY_KEY</th>
+							<th class="text-center">NULLABLE</th>
+							<th class="text-center">DATA_TYPE</th>
+							<th class="text-center">DATA_LENGTH</th>
+						</tr>
+					</thead>
+					<tbody id="table_body">
+					{% if issue %}
+						{% for x in issue %}
+						<tr class="ttr bg-success">
+							<td class="text-center job_id">{{ x.id }}</td>
+							<td class="text-center">{{ x.job_stat }}</td>
+							<td class="text-center">{{ x.req}}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.req_msg }}</td>
+							<td class="text-center">{{ x.res }}</td>
+							<td  style="text-overflow:ellipsis; overflow:hidden">{{ x.res_msg }}</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+						<tr>
+							<td colspan="8" class="col-xs-12 text-center">NO DATA</td>
+						</tr>
+					{% endif %}
+					</tbody>
+				</table>
+			</div>
+		</div>
+
+	</div>
+	<div class="hide">
+		<input type="hidden" name="issue_id" id="issue_id"  />
+	</div>
+</div>
+
+{% endblock %}
